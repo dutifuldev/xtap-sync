@@ -15,12 +15,15 @@ Before finishing a change, run:
 gofmt -w cmd internal
 go test -coverprofile=coverage.out ./...
 go vet ./...
-slophammer-go check . --coverage-profile coverage.out
+go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.0 run
+./scripts/check-go-coverage.sh
+go run github.com/dutifuldev/slophammer/go/cmd/slophammer-go@v0.4.0 dry . --max-candidates 0
+go run github.com/dutifuldev/slophammer/go/cmd/slophammer-go@v0.4.0 crap . --max-score 8
+go run github.com/dutifuldev/slophammer/go/cmd/slophammer-go@v0.4.0 check . --coverage-profile coverage.out --only go.coverage-required --only go.dry-required --only go.crap-required
 git diff --check
 ```
 
-If `slophammer-go` is not installed, use the matching Go checker from a local
-Slophammer checkout and state that path in the handoff.
+Use the pinned `go run` commands above so local checks match CI.
 
 ## Go Rules
 
