@@ -1,12 +1,9 @@
 # xtap-sync
 
-`xtap-sync` syncs local xTap JSONL exports into a Git repository. It reads flat
-`tweets-YYYY-MM-DD.jsonl` files from an xTap output directory, deduplicates tweet
+`xtap-sync` syncs local [xTap][xtap] JSONL exports into a Git repository. It reads flat
+`tweets-YYYY-MM-DD.jsonl` files from an [xTap][xtap] output directory, deduplicates tweet
 records by `id`, and writes normalized archive files under
 `data/tweets/YYYY/MM/` in the target repository.
-
-It is designed to consume exports from
-[`mkubicek/xtap`](https://github.com/mkubicek/xtap).
 
 The target repository is configurable. It can be a private data store, a public
 archive, or any Git checkout that `git push` can update.
@@ -30,7 +27,7 @@ xtap-sync sync --source "$HOME/Downloads/xtap" --repo "$HOME/repos/my-xtap-data"
 ```
 
 If the target repository has an `origin` remote, `xtap-sync` fetches that branch,
-merges remote records with local xTap records, commits changed archive files, and
+merges remote records with local [xTap][xtap] records, commits changed archive files, and
 pushes. Use `--no-push` for local-only testing:
 
 ```sh
@@ -151,10 +148,12 @@ the same normalized archive files to object storage such as Hugging Face buckets
 ## Data Policy
 
 Only `data/tweets/YYYY/MM/tweets-YYYY-MM-DD.jsonl` files are managed in the target
-repository. xTap source files are read from a flat `tweets-YYYY-MM-DD.jsonl`
+repository. [xTap][xtap] source files are read from a flat `tweets-YYYY-MM-DD.jsonl`
 output directory. Media folders, partial downloads, logs, credentials, and common
 binary media files are ignored.
 
 ## License
 
 [MIT](LICENSE)
+
+[xtap]: https://github.com/mkubicek/xtap
