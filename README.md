@@ -5,6 +5,9 @@
 records by `id`, and writes normalized archive files under
 `data/tweets/YYYY/MM/` in the target repository.
 
+It is designed to consume exports from
+[`mkubicek/xtap`](https://github.com/mkubicek/xtap).
+
 The target repository is configurable. It can be a private data store, a public
 archive, or any Git checkout that `git push` can update.
 
