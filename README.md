@@ -79,7 +79,7 @@ Useful environment variables:
 
 ## Background Sync
 
-On macOS, install an hourly LaunchAgent:
+Install an hourly background sync from a config file:
 
 ```sh
 xtap-sync install-service --config "$HOME/.config/xtap-sync/config.json"
@@ -91,10 +91,35 @@ Without a config file:
 xtap-sync install-service --source "$HOME/Downloads/xtap" --repo "$HOME/repos/my-xtap-data"
 ```
 
-The service logs to:
+On macOS, this installs a LaunchAgent under:
+
+```text
+$HOME/Library/LaunchAgents/
+```
+
+LaunchAgent logs are written to:
 
 ```text
 $HOME/Library/Logs/xtap-sync/
+```
+
+On Linux, this installs a systemd user service and timer under:
+
+```text
+$XDG_CONFIG_HOME/systemd/user/
+```
+
+or, if `XDG_CONFIG_HOME` is unset:
+
+```text
+$HOME/.config/systemd/user/
+```
+
+For unattended syncs on a headless Linux host, make sure the user manager can run
+without an active login session:
+
+```sh
+loginctl enable-linger "$USER"
 ```
 
 Remove it with:

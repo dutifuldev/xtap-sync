@@ -10,20 +10,6 @@ import (
 	"time"
 )
 
-type ServiceConfig struct {
-	Label         string
-	BinaryPath    string
-	ConfigPath    string
-	SourceDir     string
-	RepoDir       string
-	Remote        string
-	Branch        string
-	CommitMessage string
-	NoPush        bool
-	Interval      time.Duration
-	LoadService   bool
-}
-
 func InstallLaunchdService(cfg ServiceConfig) (string, error) {
 	if err := validateServiceConfig(cfg); err != nil {
 		return "", err
@@ -42,29 +28,6 @@ func InstallLaunchdService(cfg ServiceConfig) (string, error) {
 		return plistPath, loadLaunchdService(cfg.Label, plistPath)
 	}
 	return plistPath, nil
-}
-
-func validateServiceConfig(cfg ServiceConfig) error {
-	if cfg.Label == "" {
-		return fmt.Errorf("label is required")
-	}
-	if cfg.BinaryPath == "" {
-		return fmt.Errorf("binary path is required")
-	}
-	if cfg.SourceDir == "" {
-		return fmt.Errorf("source directory is required")
-	}
-	if cfg.RepoDir == "" {
-		return fmt.Errorf("repo directory is required")
-	}
-	return nil
-}
-
-func withDefaultInterval(cfg ServiceConfig) ServiceConfig {
-	if cfg.Interval <= 0 {
-		cfg.Interval = time.Hour
-	}
-	return cfg
 }
 
 func prepareLaunchdPaths(label string) (string, string, error) {
@@ -124,27 +87,7 @@ func UninstallLaunchdService(label string) (string, error) {
 
 func launchdPlist(cfg ServiceConfig, logDir string) string {
 	seconds := launchdIntervalSeconds(cfg.Interval)
-
-	args := []string{
-		cfg.BinaryPath,
-		"service-run",
-	}
-	if cfg.ConfigPath != "" {
-		args = append(args, "--config", cfg.ConfigPath)
-	} else {
-		args = append(args,
-			"--source", cfg.SourceDir,
-			"--repo", cfg.RepoDir,
-			"--remote", stringDefault(cfg.Remote, "origin"),
-			"--message", stringDefault(cfg.CommitMessage, "sync xTap tweets"),
-		)
-		if cfg.Branch != "" {
-			args = append(args, "--branch", cfg.Branch)
-		}
-		if cfg.NoPush {
-			args = append(args, "--no-push")
-		}
-	}
+	args := serviceRunArgs(cfg)
 
 	var buf bytes.Buffer
 	buf.WriteString(`<?xml version="1.0" encoding="UTF-8"?>` + "\n")
@@ -170,13 +113,6 @@ func launchdPlist(cfg ServiceConfig, logDir string) string {
 	buf.WriteString("</dict>\n")
 	buf.WriteString("</plist>\n")
 	return buf.String()
-}
-
-func stringDefault(value, fallback string) string {
-	if value == "" {
-		return fallback
-	}
-	return value
 }
 
 func launchdIntervalSeconds(interval time.Duration) int {

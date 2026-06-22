@@ -194,15 +194,20 @@ func parseVerifySettings(args []string) (syncSettings, error) {
 }
 
 func runInstallService(args []string) error {
-	if runtime.GOOS != "darwin" {
-		return fmt.Errorf("install-service currently supports macOS launchd only")
-	}
-
 	service, err := parseInstallService(args)
 	if err != nil {
 		return err
 	}
-	path, err := syncer.InstallLaunchdService(service)
+
+	var path string
+	switch runtime.GOOS {
+	case "darwin":
+		path, err = syncer.InstallLaunchdService(service)
+	case "linux":
+		path, err = syncer.InstallSystemdUserService(service)
+	default:
+		err = fmt.Errorf("install-service supports macOS launchd and linux systemd user services only")
+	}
 	if err != nil {
 		return err
 	}
@@ -215,8 +220,8 @@ func parseInstallService(args []string) (syncer.ServiceConfig, error) {
 	flags := commandFlagSet("install-service")
 	values := registerSyncFlags(flags, true)
 	intervalText := flags.String("interval", "", "sync interval")
-	label := flags.String("label", "", "launchd label")
-	noStart := flags.Bool("no-start", false, "write plist but do not load it")
+	label := flags.String("label", "", "service label")
+	noStart := flags.Bool("no-start", false, "write service files but do not load/start them")
 
 	if err := flags.Parse(args); err != nil {
 		return syncer.ServiceConfig{}, err
@@ -273,19 +278,24 @@ func buildServiceConfig(settings syncSettings, cfg fileConfig, overrides service
 }
 
 func runUninstallService(args []string) error {
-	if runtime.GOOS != "darwin" {
-		return fmt.Errorf("uninstall-service currently supports macOS launchd only")
-	}
-
 	flags := flag.NewFlagSet("uninstall-service", flag.ContinueOnError)
 	flags.SetOutput(os.Stderr)
 
-	label := flags.String("label", defaultLabel, "launchd label")
+	label := flags.String("label", defaultLabel, "service label")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
 
-	path, err := syncer.UninstallLaunchdService(*label)
+	var path string
+	var err error
+	switch runtime.GOOS {
+	case "darwin":
+		path, err = syncer.UninstallLaunchdService(*label)
+	case "linux":
+		path, err = syncer.UninstallSystemdUserService(*label)
+	default:
+		err = fmt.Errorf("uninstall-service supports macOS launchd and linux systemd user services only")
+	}
 	if err != nil {
 		return err
 	}
