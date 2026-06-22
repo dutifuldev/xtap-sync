@@ -1,0 +1,16 @@
+.DS_Store
+coverage.out
+*.log
+*.tmp
+*.part
+media/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.mp4
+*.mov
+*.m4v
+*.avi
+*.heic
